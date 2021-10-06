@@ -1,5 +1,6 @@
+
 //programa en C para consultar los datos de la base de datos
-//Suma de las partidas ganadas de Victoria
+//Suma de los puntos de jugador introducido
 //#include <my_global.h>
 #include <mysql.h>
 #include <string.h>
@@ -11,14 +12,7 @@ int main(int argc, char **argv)
 	int err;
 	// Estructura especial para almacenar resultados de consultas 
 	MYSQL_RES *resultado;
-	MYSQL_ROW rowS;
-	MYSQL_ROW rowI;
-	char consulta [80];
-	int idJI=4;
-	int idPI[100];
-	int idPS[100];
-	char nombre[60];
-	strcpy (nombre,"Victoria");
+	MYSQL_ROW row;
 	//Creamos una conexion al servidor MYSQL 
 	conn = mysql_init(NULL);
 	if (conn==NULL) {
@@ -35,8 +29,12 @@ int main(int argc, char **argv)
 	}
 		
 		// construimos la consulta SQL
-		sprintf (consulta,"SELECT sum (partidas.ganador) FROM (partidas, participacion, jugador) WHERE jugador.nombre = '%s' AND jugador.id = participacion.idJ AND participacion.idP = partidas.id",nombre);
-		// hacemos la consulta 
+	    printf("Dame el nombre \n");
+	    char nombre [20];
+		scanf ("%s", nombre);
+		char consulta [200];
+		sprintf(consulta,"SELECT sum(participacion.puntos) FROM (participacion, jugador) WHERE jugador.nombre = '%s' AND jugador.id = participacion.idJ", nombre);
+		//strcpy(consulta,"SELECT * FROM participacion");
 		err=mysql_query (conn, consulta); 
 		if (err!=0) {
 			printf ("Error al consultar datos de la base %u %s\n",
@@ -45,22 +43,13 @@ int main(int argc, char **argv)
 		}
 		//recogemos el resultado de la consulta 
 		resultado = mysql_store_result (conn); 
-		rowS = mysql_fetch_row (resultado);
-		int x=0;
-		int y=0;
-		if (rowS == NULL)
-			printf ("No se han obtenido datos en la consulta\n");
-		else{
-			while (rowS !=NULL) {
-			// El resultado debe ser una matriz con 3 filas
-			// y una columna que contiene el id de partida
-				idPS[x]=atoi(rowS[0]);
-				x++;
-				rowS = mysql_fetch_row (resultado);
-			}
-			y=x;
+		row = mysql_fetch_row (resultado);
+		if (row == NULL){
+			printf("No ha jugado");
 		}
-		sprintf("La suma de las partidas ganadas de %s son %d", nombre,idPS[0]);
+		else{
+			printf("Resultado: %s", row[0]);
+		}
 		// cerrar la conexion con el servidor MYSQL 
 		mysql_close (conn);
 		exit(0);
